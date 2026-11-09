@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Estructuras en memoria para recordar los datos durante las pruebas
 cola_prioritaria = []
 cola_normal = []
 contador_pedidos = 1
@@ -18,7 +17,6 @@ estadisticas = {
 def index():
     return render_template('index.html')
 
-# API para obtener el estado actual de las filas y estadísticas
 @app.route('/api/estado', methods=['GET'])
 def obtener_estado():
     return jsonify({
@@ -27,7 +25,6 @@ def obtener_estado():
         "estadisticas": estadisticas
     })
 
-# Requerimiento 1: Registrar pedido
 @app.route('/api/registrar', methods=['POST'])
 def registrar_pedido():
     global contador_pedidos
@@ -51,7 +48,6 @@ def registrar_pedido():
         
     return jsonify({"success": True, "pedido": nuevo_pedido})
 
-# Requerimiento 2: Preparar el siguiente pedido
 @app.route('/api/preparar', methods=['POST'])
 def preparar_pedido():
     pedido_atendido = None
@@ -70,7 +66,6 @@ def preparar_pedido():
     
     return jsonify({"success": False, "message": "No hay pedidos pendientes."})
 
-# Requerimiento 3: Consultar el siguiente pedido
 @app.route('/api/siguiente', methods=['GET'])
 def consultar_siguiente():
     if cola_prioritaria:
@@ -79,20 +74,17 @@ def consultar_siguiente():
         return jsonify({"success": True, "pedido": cola_normal[0], "fila": "Normal"})
     return jsonify({"success": False, "message": "No hay pedidos en espera."})
 
-# Requerimiento 6: Cancelar pedido
 @app.route('/api/cancelar/<int:numero>', methods=['DELETE'])
 def cancelar_pedido(numero):
     global cola_prioritaria, cola_normal
     
     encontrado = False
-    # Buscar en prioritarios
     for p in cola_prioritaria:
         if p["numero"] == numero:
             cola_prioritaria.remove(p)
             encontrado = True
             break
             
-    # Buscar en normales si no estaba en prioritarios
     if not encontrado:
         for p in cola_normal:
             if p["numero"] == numero:
